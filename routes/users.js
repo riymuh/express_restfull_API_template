@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+var fractal = require("fractal-transformer")();
 
 const model = require("../models/index");
 // GET users listing.
@@ -9,10 +10,19 @@ router.get("/", async function (req, res, next) {
       include: [model.posts],
     });
     if (users.length !== 0) {
+      //transform data
+      var dataTransformed = fractal(users, {
+        user_id: "id",
+        name: "name",
+        email: "email",
+        phone_number: "phone_number",
+        gender: "gender",
+      });
+
       res.json({
         status: "OK",
         messages: "",
-        data: users,
+        data: dataTransformed,
       });
     } else {
       res.json({
@@ -66,10 +76,27 @@ router.get("/:id", async function (req, res, next) {
       },
     });
     if (users.length !== 0) {
+      var dataTransformed = fractal(users, {
+        user_id: "id",
+        name: "name",
+        email: "email",
+        phone_number: "phone_number",
+        gender: function (data) {
+          return data.get("gender") ? true : false;
+        },
+        posts:
+          Object.keys(users.posts).length > 0
+            ? fractal(users.posts, {
+                post_id: "id",
+                title: "title",
+              })
+            : [],
+      });
+
       res.json({
         status: "OK",
         messages: "",
-        data: users,
+        data: dataTransformed,
       });
     } else {
       res.json({
