@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var fractal = require("fractal-transformer")();
-var usersTrasnformer = require("../transformers/users");
+var usersTransformer = require("../transformers/users");
 
 const model = require("../models/index");
 // GET users listing.
@@ -102,7 +102,7 @@ router.get("/:id", async function (req, res, next) {
       //       : [],
       // });
 
-      var dataTransformed = fractal(users, usersTrasnformer);
+      var dataTransformed = fractal(users, usersTransformer);
 
       res.json({
         status: "OK",
