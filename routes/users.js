@@ -12,21 +12,22 @@ router.get("/", async function (req, res, next) {
     });
     if (users.length !== 0) {
       //transform data
-      var dataTransformed = fractal(users, {
-        user_id: "id",
-        name: "name",
-        email: "email",
-        phone_number: "phone_number",
-        gender: "gender",
-        posts: function (data) {
-          return data.get("posts").length > 0
-            ? fractal(data.get("posts"), {
-                post_id: "id",
-                title: "title",
-              })
-            : [];
-        },
-      });
+      // var dataTransformed = fractal(users, {
+      //   user_id: "id",
+      //   name: "name",
+      //   email: "email",
+      //   phone_number: "phone_number",
+      //   gender: "gender",
+      //   posts: function (data) {
+      //     return data.get("posts").length > 0
+      //       ? fractal(data.get("posts"), {
+      //           post_id: "id",
+      //           title: "title",
+      //         })
+      //       : [];
+      //   },
+      // });
+      var dataTransformed = fractal(users, usersTransformer);
 
       res.json({
         status: "OK",
@@ -51,18 +52,20 @@ router.get("/", async function (req, res, next) {
 // POST users
 router.post("/", async function (req, res, next) {
   try {
-    const { name, email, gender, phoneNumber } = req.body;
+    const { name, email, gender, phone_number } = req.body;
     const users = await model.users.create({
       name,
       email,
       gender,
-      phone_number: phoneNumber,
+      phone_number,
     });
+
+    var dataTransformed = fractal(users, usersTransformer);
     if (users) {
       res.status(201).json({
         status: "OK",
         messages: "User berhasil ditambahkan",
-        data: users,
+        data: dataTransformed,
       });
     }
   } catch (err) {
@@ -129,13 +132,13 @@ router.get("/:id", async function (req, res, next) {
 router.patch("/:id", async function (req, res, next) {
   try {
     const usersId = req.params.id;
-    const { name, email, gender, phoneNumber } = req.body;
+    const { name, email, gender, phone_number } = req.body;
     const users = await model.users.update(
       {
         name,
         email,
         gender,
-        phone_number: phoneNumber,
+        phone_number,
       },
       {
         where: {
@@ -143,11 +146,20 @@ router.patch("/:id", async function (req, res, next) {
         },
       }
     );
+
+    const users_update = await model.users.findOne({
+      include: [model.posts],
+      where: {
+        id: usersId,
+      },
+    });
+
+    var dataTransformed = fractal(users_update, usersTransformer);
     if (users) {
       res.json({
         status: "OK",
         messages: "User berhasil diupdate",
-        data: users,
+        data: dataTransformed,
       });
     }
   } catch (err) {

@@ -9,7 +9,7 @@ module.exports = {
     return data.get("gender") ? true : false;
   },
   posts: function (data) {
-    return data.get("posts").length > 0
+    return data.get("posts") || data.get("posts") > 0
       ? fractal(data.get("posts"), {
           post_id: "id",
           title: "title",
