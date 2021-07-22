@@ -3,6 +3,7 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+var authMiddleware = require("./middleware/auth");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -20,9 +21,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+//Router
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use(
+  "/users",
+  [
+    authMiddleware.verifyToken,
+    authMiddleware.verifyRole,
+    authMiddleware.verifyHeader,
+  ],
+  usersRouter
+);
 app.use("/posts", postsRouter);
+
+//Router
 
 // catch 404 and forward to error handler
 app.use(function (err, req, res, next) {
