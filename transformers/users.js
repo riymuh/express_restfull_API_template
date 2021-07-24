@@ -5,6 +5,7 @@ module.exports = {
   name: "name",
   email: "email",
   phone_number: "phone_number",
+  password: "password",
   gender: function (data) {
     return data.get("gender") ? true : false;
   },

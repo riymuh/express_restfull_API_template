@@ -8,6 +8,7 @@ var authMiddleware = require("./middleware/auth");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var postsRouter = require("./routes/posts");
+var authRouter = require("./routes/auth.routes");
 
 var app = express();
 
@@ -23,13 +24,14 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //Router
 app.use("/", indexRouter);
+app.use("/auth/", authRouter);
 app.use(
   "/users",
-  [
-    authMiddleware.verifyToken,
-    authMiddleware.verifyRole,
-    authMiddleware.verifyHeader,
-  ],
+  // [
+  //   authMiddleware.verifyToken,
+  //   authMiddleware.verifyRole,
+  //   authMiddleware.verifyHeader,
+  // ],
   usersRouter
 );
 app.use("/posts", postsRouter);
