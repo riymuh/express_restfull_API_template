@@ -80,6 +80,9 @@ router.post("/", async function (req, res, next) {
 //FIND USER
 router.get("/:id", async function (req, res, next) {
   try {
+    //get from auth jwt middleware
+    let userIdLoggedIn = req.userId;
+
     const usersId = req.params.id;
     const users = await model.users.findOne({
       include: [model.posts],
@@ -110,6 +113,7 @@ router.get("/:id", async function (req, res, next) {
       res.json({
         status: "OK",
         messages: "",
+        userIdLoggedIn: userIdLoggedIn,
         data: dataTransformed,
       });
     } else {

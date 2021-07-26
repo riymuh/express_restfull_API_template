@@ -3,7 +3,8 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-var authMiddleware = require("./middleware/auth");
+// var authMiddleware = require("./middleware/auth");
+var { authJwt } = require("./middleware/");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -25,15 +26,7 @@ app.use(express.static(path.join(__dirname, "public")));
 //Router
 app.use("/", indexRouter);
 app.use("/auth/", authRouter);
-app.use(
-  "/users",
-  // [
-  //   authMiddleware.verifyToken,
-  //   authMiddleware.verifyRole,
-  //   authMiddleware.verifyHeader,
-  // ],
-  usersRouter
-);
+app.use("/users", [authJwt.verifyToken], usersRouter);
 app.use("/posts", postsRouter);
 
 //Router

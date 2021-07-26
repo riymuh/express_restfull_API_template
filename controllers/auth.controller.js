@@ -32,39 +32,39 @@ exports.signup = async function (req, res, next) {
 };
 
 exports.signin = async function (req, res, next) {
-  await User.findOne({
-    where: {
-      email: req.body.email,
-    },
-  })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: "User Not found." });
-      }
-
-      var passwordIsValid = bcrypt.compareSync(
-        req.body.password,
-        user.password
-      );
-
-      if (!passwordIsValid) {
-        return res.status(401).send({
-          accessToken: null,
-          message: "Invalid Password!",
-        });
-      }
-
-      var token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: 86400, // 24 hours
-      });
-
-      res.status(200).send({
-        id: user.id,
-        email: user.email,
-        accessToken: token,
-      });
-    })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
+  try {
+    const users = await User.findOne({
+      where: {
+        email: req.body.email,
+      },
     });
+
+    if (!users) {
+      return res.status(404).send({ message: "User Not found." });
+    }
+
+    var passwordIsValid = bcrypt.compareSync(req.body.password, users.password);
+
+    if (!passwordIsValid) {
+      return res.status(401).send({
+        accessToken: null,
+        message: "Invalid Password!",
+      });
+    }
+
+    var token = jwt.sign({ id: users.id }, config.secret, {
+      expiresIn: 86400, // 24 hours
+    });
+
+    var dataTransformed = fractal(users, usersTransformer);
+
+    res.json({
+      status: "OK",
+      messages: "",
+      accessToken: token,
+      data: dataTransformed,
+    });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
