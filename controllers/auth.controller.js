@@ -1,7 +1,7 @@
 const db = require("../models");
 const config = require("../config/auth.config");
 var fractal = require("fractal-transformer")();
-var usersTransformer = require("../transformers/users");
+var usersTransformer = require("../transformers/user.transformer");
 const User = db.users;
 
 const Op = db.Sequelize.Op;

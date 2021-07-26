@@ -1,27 +1,18 @@
-var express = require("express");
-var router = express.Router();
+const db = require("../models");
+const config = require("../config/auth.config");
 var fractal = require("fractal-transformer")();
+var { postTransformer } = require("../transformers/");
+const Post = db.posts;
+const Op = db.Sequelize.Op;
 
-const model = require("../models/index");
-// GET posts listing.
-router.get("/", async function (req, res, next) {
+exports.getPosts = async function (req, res, next) {
   try {
-    const posts = await model.posts.findAll({
-      include: [model.users],
+    const posts = await Post.findAll({
+      include: [db.users],
     });
 
     //transform data
-    var dataTransformed = fractal(posts, {
-      post_id: "id",
-      title: "title",
-      writer: "writer",
-      body: "body",
-      created_at: "createdAt",
-      user: {
-        user_id: "user.id",
-        name: "user.name",
-      },
-    });
+    var dataTransformed = fractal(posts, postTransformer);
 
     if (posts.length !== 0) {
       res.json({
@@ -43,21 +34,24 @@ router.get("/", async function (req, res, next) {
       data: {},
     });
   }
-});
-//FIND USER
-router.get("/:id", async function (req, res, next) {
+};
+
+exports.getPost = async function (req, res, next) {
   try {
     const postsId = req.params.id;
-    const posts = await model.posts.findOne({
+    const posts = await Post.findOne({
       where: {
         id: postsId,
       },
     });
     if (posts.length !== 0) {
+      //transform data
+      var dataTransformed = fractal(posts, postTransformer);
+
       res.json({
         status: "OK",
         messages: "",
-        data: posts,
+        data: dataTransformed,
       });
     } else {
       res.json({
@@ -73,6 +67,4 @@ router.get("/:id", async function (req, res, next) {
       data: {},
     });
   }
-});
-
-module.exports = router;
+};

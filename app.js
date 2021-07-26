@@ -7,9 +7,9 @@ var logger = require("morgan");
 var { authJwt } = require("./middleware/");
 
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var postsRouter = require("./routes/posts");
-var authRouter = require("./routes/auth.routes");
+var usersRouter = require("./routes/user.route");
+var postsRouter = require("./routes/post.route");
+var authRouter = require("./routes/auth.route");
 
 var app = express();
 
@@ -26,8 +26,9 @@ app.use(express.static(path.join(__dirname, "public")));
 //Router
 app.use("/", indexRouter);
 app.use("/auth/", authRouter);
-app.use("/users", [authJwt.verifyToken], usersRouter);
-app.use("/posts", postsRouter);
+//app.use("/users", [authJwt.verifyToken], usersRouter);
+app.use("/users", usersRouter);
+app.use("/posts", [authJwt.verifyToken], postsRouter);
 
 //Router
 

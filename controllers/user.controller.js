@@ -1,14 +1,14 @@
-var express = require("express");
-var router = express.Router();
+const db = require("../models");
+const config = require("../config/auth.config");
 var fractal = require("fractal-transformer")();
-var usersTransformer = require("../transformers/users");
+var { userTransformer } = require("../transformers/");
+const User = db.users;
+const Op = db.Sequelize.Op;
 
-const model = require("../models/index");
-// GET users listing.
-router.get("/", async function (req, res, next) {
+exports.getUsers = async function (req, res, next) {
   try {
-    const users = await model.users.findAll({
-      include: [model.posts],
+    const users = await User.findAll({
+      include: [db.posts],
     });
     if (users.length !== 0) {
       //transform data
@@ -27,7 +27,7 @@ router.get("/", async function (req, res, next) {
       //       : [];
       //   },
       // });
-      var dataTransformed = fractal(users, usersTransformer);
+      var dataTransformed = fractal(users, userTransformer);
 
       res.json({
         status: "OK",
@@ -48,19 +48,19 @@ router.get("/", async function (req, res, next) {
       data: {},
     });
   }
-});
-// POST users
-router.post("/", async function (req, res, next) {
+};
+
+exports.createUser = async function (req, res, next) {
   try {
     const { name, email, gender, phone_number } = req.body;
-    const users = await model.users.create({
+    const users = await User.create({
       name,
       email,
       gender,
       phone_number,
     });
 
-    var dataTransformed = fractal(users, usersTransformer);
+    var dataTransformed = fractal(users, userTransformer);
     if (users) {
       res.status(201).json({
         status: "OK",
@@ -75,17 +75,17 @@ router.post("/", async function (req, res, next) {
       data: {},
     });
   }
-});
+};
 
-//FIND USER
-router.get("/:id", async function (req, res, next) {
+exports.getUser = async function (req, res, next) {
   try {
     //get from auth jwt middleware
-    let userIdLoggedIn = req.userId;
+    //let userIdLoggedIn = req.userId;
+    let userIdLoggedIn = 1;
 
     const usersId = req.params.id;
-    const users = await model.users.findOne({
-      include: [model.posts],
+    const users = await User.findOne({
+      include: [db.posts],
       where: {
         id: usersId,
       },
@@ -108,7 +108,7 @@ router.get("/:id", async function (req, res, next) {
       //       : [],
       // });
 
-      var dataTransformed = fractal(users, usersTransformer);
+      var dataTransformed = fractal(users, userTransformer);
 
       res.json({
         status: "OK",
@@ -130,14 +130,13 @@ router.get("/:id", async function (req, res, next) {
       data: {},
     });
   }
-});
+};
 
-// UPDATE users
-router.patch("/:id", async function (req, res, next) {
+exports.updateUser = async function (req, res, next) {
   try {
     const usersId = req.params.id;
     const { name, email, gender, phone_number } = req.body;
-    const users = await model.users.update(
+    const users = await User.update(
       {
         name,
         email,
@@ -151,14 +150,14 @@ router.patch("/:id", async function (req, res, next) {
       }
     );
 
-    const users_update = await model.users.findOne({
-      include: [model.posts],
+    const users_update = await User.findOne({
+      include: [db.posts],
       where: {
         id: usersId,
       },
     });
 
-    var dataTransformed = fractal(users_update, usersTransformer);
+    var dataTransformed = fractal(users_update, userTransformer);
     if (users) {
       res.json({
         status: "OK",
@@ -173,12 +172,12 @@ router.patch("/:id", async function (req, res, next) {
       data: {},
     });
   }
-});
-// DELETE users
-router.delete("/:id", async function (req, res, next) {
+};
+
+exports.deleteUser = async function (req, res, next) {
   try {
     const usersId = req.params.id;
-    const users = await model.users.destroy({
+    const users = await User.destroy({
       where: {
         id: usersId,
       },
@@ -197,6 +196,4 @@ router.delete("/:id", async function (req, res, next) {
       data: {},
     });
   }
-});
-
-module.exports = router;
+};
