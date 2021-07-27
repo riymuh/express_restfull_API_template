@@ -13,7 +13,7 @@ verifyPostByUserId = async function (req, res, next) {
 
   if (posts.userId != userId) {
     return res.status(403).send({
-      message: "You cannot acces this post",
+      message: "You don't have access to this post",
     });
   }
   next();
